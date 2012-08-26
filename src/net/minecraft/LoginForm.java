@@ -702,6 +702,7 @@ balanceProfileLabel.setFont(fontProfile);
 	 
 	 JLabel text = new JLabel("");
  	URL localURL;
+
 	try {
 		localURL = new URL(setting.monitorLink);
 	 	BufferedReader localBufferedReader = new BufferedReader(new InputStreamReader(localURL.openStream()));

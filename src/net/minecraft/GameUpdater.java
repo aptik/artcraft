@@ -225,13 +225,9 @@ public class GameUpdater implements Runnable
         File versionFile = new File(dir, "version");
        
         boolean cacheAvailable = false;
-        if ((!forceUpdate) && (versionFile.exists()) && (
-          (latestVersion.equals("-1")) || (latestVersion.equals(readVersionFile(versionFile))))) {
-          cacheAvailable = true;
-          percentage = 90;
-        }
 
-        if ((forceUpdate) || (!cacheAvailable)) {
+
+        if ((forceUpdate)) { //TODO: donload from artcraft server
           shouldUpdate = true;
           if ((!forceUpdate) && (versionFile.exists()))
           {

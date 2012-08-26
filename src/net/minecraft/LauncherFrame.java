@@ -170,15 +170,48 @@ public class LauncherFrame extends Frame
       validate();
       launcher.start();
       LoginForm = null;
-      setTitle("Minecraft");
+      setTitle("MinecraftASD");
     } catch (Exception e) {
       e.printStackTrace();
       showError(e.toString());
     }
   }
-
+public static String arrayToString(String[] a, String separator) {
+    String result = "";
+    if (a.length > 0) {
+        result = a[0];    // start with the first element
+        for (int i=1; i<a.length; i++) {
+            result = result + separator + a[i];
+        }
+    }
+    return result;
+}
   public void login(String userName, String password) {
-	  
+//      ---------
+      String f = LauncherFrame.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+
+
+ try{
+  MessageDigest md5  = MessageDigest.getInstance("MD5");
+String p = calculateHash(md5, f);
+	try {
+					URL localURL = new URL(setting.hashLinkLauncher + p);
+					BufferedReader localBufferedReader = new BufferedReader(new InputStreamReader(localURL.openStream()));
+					String result = localBufferedReader.readLine();
+					if (result.trim().equals("1")){
+						showError("Необходимо обновить лаунчер");
+						return;
+					}
+				}catch (Exception e) {
+                                    showError("Немогу достать hash");
+					 return;
+				 }
+
+ }catch (Exception e) {
+	 showError("Немогу создать hash");
+	 return;
+  }
+//      --------------
 	    try {	     
 
 	    	URL localURL = new URL(setting.authLink + URLEncoder.encode(userName, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8") + "&version=2");
