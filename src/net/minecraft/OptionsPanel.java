@@ -14,17 +14,15 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URL;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 public class OptionsPanel extends JDialog
 {
   private static final long serialVersionUID = 1L;
-  
+  public JTextField memoryfield = new JTextField(4);
+  public static int memory;
+  public static String memorys;
 
   public OptionsPanel(Frame parent)
   {
@@ -33,7 +31,7 @@ public class OptionsPanel extends JDialog
     setModal(true);
 
     JPanel panel = new JPanel(new BorderLayout());
-    JLabel label = new JLabel("Настройки", 0);
+    JLabel label = new JLabel("РќР°СЃС‚СЂРѕР№РєРё", 0);
     label.setBorder(new EmptyBorder(0, 0, 16, 0));
     label.setFont(new Font("Default", 1, 16));
     panel.add(label, "North");
@@ -44,9 +42,9 @@ public class OptionsPanel extends JDialog
     optionsPanel.add(labelPanel, "West");
     optionsPanel.add(fieldPanel, "Center");
 
-    final TransparentCheckbox dlFl = new TransparentCheckbox ("Обновить клиент!");
+    final TransparentCheckbox dlFl = new TransparentCheckbox ("РћР±РЅРѕРІРёС‚СЊ РєР»РёРµРЅС‚!");
 
-    
+
     dlFl.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent ae) {
             boolean forceUpdateInfo;
@@ -57,22 +55,23 @@ public class OptionsPanel extends JDialog
             	GameUpdater.forceUpdate = false;
         }
       });
-    
-    
-    final JButton forceButton = new JButton("Обновить клиент!");
+
+
+    final JButton forceButton = new JButton("РћР±РЅРѕРІРёС‚СЊ РєР»РёРµРЅС‚!");
     forceButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
         GameUpdater.forceUpdate = true;
-        forceButton.setText("Клиент будет обновлен!");
+        forceButton.setText("РљР»РёРµРЅС‚ Р±СѓРґРµС‚ РѕР±РЅРѕРІР»РµРЅ!");
         forceButton.setEnabled(false);
       }
     });
-    
+
     fieldPanel.add(dlFl);
-    labelPanel.add(new JLabel("Принудительно обновить клиент: ", 4));
+    labelPanel.add(new JLabel("РџСЂРёРЅСѓРґРёС‚РµР»СЊРЅРѕ РѕР±РЅРѕРІРёС‚СЊ РєР»РёРµРЅС‚: ", 4));
     fieldPanel.add(forceButton);
 
-    labelPanel.add(new JLabel("Расположение клиента на компьютере: ", 4));
+    labelPanel.add(new JLabel("Р Р°СЃРїРѕР»РѕР¶РµРЅРёРµ РєР»РёРµРЅС‚Р° РЅР° РєРѕРјРїСЊСЋС‚РµСЂРµ: ", 4));
+    labelPanel.add(new JLabel("РЎРєРѕР»СЊРєРѕ РїР°РјСЏС‚Рё РІС‹РґРµР»СЏС‚СЊ РёРіСЂРµ (РІ РјРµРіР°Р±Р°Р№С‚Р°С…): ", 4));
     TransparentLabel dirLink = new TransparentLabel(Util.getWorkingDirectory().toString()) {
       private static final long serialVersionUID = 0L;
 
@@ -113,11 +112,29 @@ public class OptionsPanel extends JDialog
 
     panel.add(optionsPanel, "Center");
 
+    memory = Util.getMemorySelection();
+    if (memory == 1)
+    	memory = 1024;
+    String memos = Integer.toString(memory);
+    memoryfield.setText(memos);
+    fieldPanel.add(memoryfield,"mb");
+
     JPanel buttonsPanel = new JPanel(new BorderLayout());
     buttonsPanel.add(new JPanel(), "Center");
     JButton doneButton = new JButton("Done");
     doneButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
+        memorys = memoryfield.getText();
+    	int memory = Integer.parseInt(memorys);
+    	if (memory != Util.getMemorySelection()) {
+			Util.setMemorySelection(memory);
+	        String[] args = null;
+			try {
+				MinecraftLauncher.main(args);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			}
         setVisible(false);
       }
     });

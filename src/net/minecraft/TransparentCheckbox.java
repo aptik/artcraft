@@ -18,11 +18,18 @@ public class TransparentCheckbox extends JCheckBox
   public TransparentCheckbox(String string)
   {
     super(string);
-    
-			setIcon(new ImageIcon("src/image/CheckBox1.png"));	
-			setRolloverIcon(new ImageIcon("src/image/CheckBox2.png"));
-			setSelectedIcon(new ImageIcon("src/image/CheckBox3.png"));
-			setRolloverSelectedIcon(new ImageIcon("src/image/CheckBox4.png"));
+                        String path1 = "CheckBox1.png";
+	                URL imgURL1 = TransparentCheckbox.class.getResource(path1);
+			setIcon(new ImageIcon(imgURL1));                        
+                        String path2 = "CheckBox2.png";
+	                URL imgURL2 = TransparentCheckbox.class.getResource(path2);
+			setRolloverIcon(new ImageIcon(imgURL2));
+                        String path3 = "CheckBox3.png";
+	                URL imgURL3 = TransparentCheckbox.class.getResource(path3);
+			setSelectedIcon(new ImageIcon(imgURL3));
+                        String path4 = "CheckBox4.png";
+	                URL imgURL4 = TransparentCheckbox.class.getResource(path4);
+			setRolloverSelectedIcon(new ImageIcon(imgURL4));
 		
 
 

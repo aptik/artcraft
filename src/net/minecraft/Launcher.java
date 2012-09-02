@@ -42,7 +42,7 @@ public class Launcher extends Applet
     if (context == 0) {
       context = -1;
       try {
-        if (getAppletContext() != null) context = 1; 
+        if (getAppletContext() != null) context = 1;
       }
       catch (Exception localException) {
       }
@@ -53,7 +53,7 @@ public class Launcher extends Applet
 
   public void init(String userName, String latestVersion, String downloadTicket, String sessionId)
   {
-	  
+
     try {
       bgImage = ImageIO.read(LoginForm.class.getResource("bg.png"));
       loadingBaloon = ImageIO.read(LoginForm.class.getResource("load1.png"));
@@ -183,7 +183,7 @@ public class Launcher extends Applet
     {
     	g.setColor(new Color(255, 255, 255));
 
-      String msg = "Обновление";
+      String msg = "РћР±РЅРѕРІР»РµРЅРёРµ";
       if (gameUpdater.fatalError) {
         msg = "Failed to launch";
       }
@@ -198,24 +198,24 @@ public class Launcher extends Applet
       if (gameUpdater.fatalError) {
         msg = gameUpdater.fatalErrorDescription;
       }
-      
 
-      
-      
+
+
+
       g.setFont(new Font(null, 0, 14));
-      
+
 
       g.drawImage(this.loadingBaloon, 40 + this.gameUpdater.percentage * (w - 128) / 100 - 6, h - 105, null);
-      
+
       if (gameUpdater.totalSizeDownload == 0){
     	  g.drawString("0%", 50 + this.gameUpdater.percentage * (w - 128) / 100, h - 88);
       } else {
     	  g.drawString((gameUpdater.currentSizeDownload * 100 / gameUpdater.totalSizeDownload) + "%", 50 + this.gameUpdater.percentage * (w - 128) / 100, h - 88);
       }
-      
-      
+
+
       g.setFont(new Font(null, 0, 24));
-      
+
       g.drawString(msg, w / 2 - fm.stringWidth(msg) / 2, h / 2 + fm.getHeight() * 1);
       msg = gameUpdater.subtaskMessage;
       g.drawString(msg, w / 2 - fm.stringWidth(msg) / 2, h / 2 + fm.getHeight() * 2);

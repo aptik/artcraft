@@ -46,6 +46,8 @@ import java.util.jar.Pack200;
 
 
 import SevenZip.LzmaAlone;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 public class GameUpdater implements Runnable
 {
@@ -71,16 +73,16 @@ public class GameUpdater implements Runnable
   public boolean fatalError;
   public String fatalErrorDescription;
   protected String subtaskMessage = "";
-  
+
   protected int state = 1;
 
   protected boolean lzmaSupported = false;
   protected boolean pack200Supported = false;
 
-  protected String[] genericErrorMessage = { 
+  protected String[] genericErrorMessage = {
     "An error occured while loading the applet.", "Please contact support to resolve this issue.", "<placeholder for error message>" };
   protected boolean certificateRefused;
-  protected String[] certificateRefusedMessage = { 
+  protected String[] certificateRefusedMessage = {
     "Permissions for Applet Refused.", "Please accept the permissions dialog to allow", "the applet to continue the loading process." };
 
   protected static boolean natives_loaded = false;
@@ -89,7 +91,7 @@ public class GameUpdater implements Runnable
   private String mainGameUrl;
   public boolean pauseAskUpdate;
   public boolean shouldUpdate;
-  
+
   public String progressStatus;
 
   public GameUpdater(String latestVersion, String mainGameUrl)
@@ -125,27 +127,27 @@ public class GameUpdater implements Runnable
   {
     switch (state) {
     case 1:
-      return "Инициализация загрузчика";
+      return "РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ Р·Р°РіСЂСѓР·С‡РёРєР°";
     case 2:
-      return "Обнаружение пакетов для скачки";
+      return "РћР±РЅР°СЂСѓР¶РµРЅРёРµ РїР°РєРµС‚РѕРІ РґР»СЏ СЃРєР°С‡РєРё";
     case 3:
-      return "Проверка кеш-файлов";
+      return "РџСЂРѕРІРµСЂРєР° РєРµС€-С„Р°Р№Р»РѕРІ";
     case 4:
-      return "Скачивание пакетов";
+      return "РЎРєР°С‡РёРІР°РЅРёРµ РїР°РєРµС‚РѕРІ";
     case 5:
-      return "Извлечение скачанных пакетов";
+      return "РР·РІР»РµС‡РµРЅРёРµ СЃРєР°С‡Р°РЅРЅС‹С… РїР°РєРµС‚РѕРІ";
     case 6:
-      return "Обновление путей";
+      return "РћР±РЅРѕРІР»РµРЅРёРµ РїСѓС‚РµР№";
     case 7:
-      return "Сворачивание апплета";
+      return "РЎРІРѕСЂР°С‡РёРІР°РЅРёРµ Р°РїРїР»РµС‚Р°";
     case 8:
-      return "Инициализация реального апплета";
+      return "РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ СЂРµР°Р»СЊРЅРѕРіРѕ Р°РїРїР»РµС‚Р°";
     case 9:
-      return "Старт реального апплета";
+      return "РЎС‚Р°СЂС‚ СЂРµР°Р»СЊРЅРѕРіРѕ Р°РїРїР»РµС‚Р°";
     case 10:
-      return "Загрузка завершена";
+      return "Р—Р°РіСЂСѓР·РєР° Р·Р°РІРµСЂС€РµРЅР°";
     }
-    return "Неизвестное положение";
+    return "РќРµРёР·РІРµСЃС‚РЅРѕРµ РїРѕР»РѕР¶РµРЅРёРµ";
   }
 
   protected String trimExtensionByCapabilities(String file)
@@ -162,15 +164,15 @@ public class GameUpdater implements Runnable
 
   protected void loadJarURLs() throws Exception {
     state = 2;
-    
-    String jarList = "lwjgl.jar, jinput.jar, lwjgl_util.jar, " + mainGameUrl;
+
+    String jarList = "lwjgl.jar, jinput.jar, lwjgl_util.jar, client.zip, " + mainGameUrl;
     jarList = trimExtensionByCapabilities(jarList);
 
     StringTokenizer jar = new StringTokenizer(jarList, ", ");
     int jarCount = jar.countTokens() + 1;
 
     urlList = new URL[jarCount];
-    
+
     URL path = new URL(setting.loadLink);
 
     for (int i = 0; i < jarCount - 1; i++) {
@@ -189,11 +191,11 @@ public class GameUpdater implements Runnable
     else if ((osName.startsWith("Solaris")) || (osName.startsWith("SunOS")))
       nativeJar = "solaris_natives.jar.lzma";
     else {
-      fatalErrorOccured("OS (" + osName + ") не поддерживается", null);
+      fatalErrorOccured("OS (" + osName + ") РЅРµ РїРѕРґРґРµСЂР¶РёРІР°РµС‚СЃСЏ", null);
     }
 
     if (nativeJar == null) {
-      fatalErrorOccured("lwjgl файлы не найдены", null);
+      fatalErrorOccured("lwjgl С„Р°Р№Р»С‹ РЅРµ РЅР°Р№РґРµРЅС‹", null);
     } else {
       nativeJar = trimExtensionByCapabilities(nativeJar);
       urlList[(jarCount - 1)] = new URL(path, nativeJar);
@@ -220,14 +222,18 @@ public class GameUpdater implements Runnable
       if (!dir.exists()) {
         dir.mkdirs();
       }
-      
+
       if (latestVersion != null) {
         File versionFile = new File(dir, "version");
-       
+
         boolean cacheAvailable = false;
+        if ((!forceUpdate) && (versionFile.exists()) && (
+          (latestVersion.equals("-1")) || (latestVersion.equals(readVersionFile(versionFile))))) {
+          cacheAvailable = true;
+          percentage = 90;
+        }
 
-
-        if ((forceUpdate)) { //TODO: donload from artcraft server
+        if ((forceUpdate) || (!cacheAvailable)) {
           shouldUpdate = true;
           if ((!forceUpdate) && (versionFile.exists()))
           {
@@ -235,12 +241,24 @@ public class GameUpdater implements Runnable
           }
           if (shouldUpdate)
           {
-            writeVersionFile(versionFile, "");
+        	  if(setting.allowMusic)
+        	  {
 
+        	writeVersionFile(versionFile, "");
+            MusPlay mp3 = new MusPlay(setting.iMusicname);
+            mp3.play();
             downloadJars(path);
             extractJars(path);
             extractNatives(path);
+        	  }
+        	  if(!setting.allowMusic)
+        	  {
+        		  writeVersionFile(versionFile, "");
 
+                  downloadJars(path);
+                  extractJars(path);
+                  extractNatives(path);
+        	  }
             if (latestVersion != null) {
               percentage = 90;
               writeVersionFile(versionFile, latestVersion);
@@ -306,11 +324,11 @@ public class GameUpdater implements Runnable
           PermissionCollection perms = null;
           try
           {
-            Method method = SecureClassLoader.class.getDeclaredMethod("getPermissions", new Class[] { 
+            Method method = SecureClassLoader.class.getDeclaredMethod("getPermissions", new Class[] {
               CodeSource.class });
 
             method.setAccessible(true);
-            perms = (PermissionCollection)method.invoke(getClass().getClassLoader(), new Object[] { 
+            perms = (PermissionCollection)method.invoke(getClass().getClassLoader(), new Object[] {
               codesource });
 
             String host = "www.minecraft.net";
@@ -432,7 +450,7 @@ public class GameUpdater implements Runnable
           }
 
           String currentFile = getFileName(urlList[i]);
-          InputStream inputstream = getJarInputStream(currentFile, urlconnection);          
+          InputStream inputstream = getJarInputStream(currentFile, urlconnection);
           FileOutputStream fos = new FileOutputStream(path + currentFile);
 
           long downloadStartTime = System.currentTimeMillis();
@@ -451,7 +469,7 @@ public class GameUpdater implements Runnable
             currentSizeDownload += bufferSize;
             fileSize += bufferSize;
             percentage = (initialPercentage + currentSizeDownload * 45 / totalSizeDownload);
-            subtaskMessage = ("Загрузка: " + currentFile + " " + currentSizeDownload * 100 / totalSizeDownload + "%");
+            subtaskMessage = ("Р—Р°РіСЂСѓР·РєР°: " + currentFile + " " + currentSizeDownload * 100 / totalSizeDownload + "%");
             progressStatus = (currentSizeDownload * 100 / totalSizeDownload + "%");
 
             downloadedAmount += bufferSize;
@@ -555,7 +573,9 @@ public class GameUpdater implements Runnable
     throws Exception
   {
     state = 5;
-    
+
+    UnZip();
+
     float increment = 10.0F / urlList.length;
 
     for (int i = 0; i < urlList.length; i++) {
@@ -633,7 +653,7 @@ public class GameUpdater implements Runnable
         continue;
       }
       File f = new File(path + "natives" + File.separator + entry.getName());
-      if ((f.exists()) && 
+      if ((f.exists()) &&
         (!f.delete()))
       {
         continue;
@@ -742,4 +762,179 @@ public class GameUpdater implements Runnable
     }
     return false;
   }
+  /**
+ * Р Р°Р·Р°СЂС…РёРІРёСЂСѓРµС‚ С„Р°Р№Р» client.zip РёР· РїР°РїРєРё bin РІ .minecraft
+ * @author ddark008
+ * @throws PrivilegedActionException
+ */
+protected void UnZip() throws PrivilegedActionException
+  {
+    String szZipFilePath;
+    String szExtractPath;
+    String path = (String)AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+        public Object run() throws Exception {
+          return Util.getWorkingDirectory() + File.separator;
+        }
+      });
+    int i;
+
+    szZipFilePath = path + "bin" + File.separator + "client.zip";
+
+    File f = new File(szZipFilePath);
+    if(!f.exists())
+    {
+      System.out.println(
+	"\nNot found: " + szZipFilePath);
+    }
+
+    if(f.isDirectory())
+    {
+      System.out.println(
+	"\nNot file: " + szZipFilePath);
+    }
+
+    System.out.println(
+      "Enter path to extract files: ");
+    szExtractPath = path;
+
+    File f1 = new File(szExtractPath);
+    if(!f1.exists())
+    {
+      System.out.println(
+	"\nNot found: " + szExtractPath);
+    }
+
+    if(!f1.isDirectory())
+    {
+      System.out.println(
+	"\nNot directory: " + szExtractPath);
+    }
+
+    ZipFile zf;
+    Vector zipEntries = new Vector();
+
+    try
+    {
+      zf = new ZipFile(szZipFilePath);
+      Enumeration en = zf.entries();
+
+      while(en.hasMoreElements())
+      {
+        zipEntries.addElement(
+	  (ZipEntry)en.nextElement());
+      }
+
+      for (i = 0; i < zipEntries.size(); i++)
+      {
+        ZipEntry ze =
+	  (ZipEntry)zipEntries.elementAt(i);
+
+        extractFromZip(szZipFilePath, szExtractPath,
+	  ze.getName(), zf, ze);
+      }
+
+      zf.close();
+      System.out.println("Done!");
+    }
+    catch(Exception ex)
+    {
+      System.out.println(ex.toString());
+    }
+  }
+
+  // ============================================
+  // extractFromZip
+  // ============================================
+  static void extractFromZip(
+    String szZipFilePath, String szExtractPath,
+    String szName,
+    ZipFile zf, ZipEntry ze)
+  {
+    if(ze.isDirectory())
+      return;
+
+    String szDstName = slash2sep(szName);
+
+    String szEntryDir;
+
+    if(szDstName.lastIndexOf(File.separator) != -1)
+    {
+      szEntryDir =
+        szDstName.substring(
+	  0, szDstName.lastIndexOf(File.separator));
+    }
+    else
+      szEntryDir = "";
+
+    System.out.print(szDstName);
+    long nSize = ze.getSize();
+    long nCompressedSize =
+      ze.getCompressedSize();
+
+    System.out.println(" " + nSize + " (" +
+      nCompressedSize + ")");
+
+    try
+    {
+       File newDir = new File(szExtractPath +
+	 File.separator + szEntryDir);
+
+       newDir.mkdirs();
+
+       FileOutputStream fos =
+	 new FileOutputStream(szExtractPath +
+	 File.separator + szDstName);
+
+       InputStream is = zf.getInputStream(ze);
+       byte[] buf = new byte[1024];
+
+       int nLength;
+
+       while(true)
+       {
+         try
+         {
+	   nLength = is.read(buf);
+         }
+         catch (EOFException ex)
+         {
+	   break;
+	 }
+
+         if(nLength < 0)
+	   break;
+         fos.write(buf, 0, nLength);
+       }
+
+       is.close();
+       fos.close();
+    }
+    catch(Exception ex)
+    {
+      System.out.println(ex.toString());
+      //System.exit(0);
+    }
+  }
+  // ============================================
+  // slash2sep
+  // ============================================
+  static String slash2sep(String src)
+  {
+    int i;
+    char[] chDst = new char[src.length()];
+    String dst;
+
+    for(i = 0; i < src.length(); i++)
+    {
+      if(src.charAt(i) == '/')
+        chDst[i] = File.separatorChar;
+      else
+        chDst[i] = src.charAt(i);
+    }
+    dst = new String(chDst);
+    return dst;
+  }
+
+
+
 }

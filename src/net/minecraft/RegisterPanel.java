@@ -22,28 +22,28 @@ public class RegisterPanel extends JDialog
 {
   private static final long serialVersionUID = 1L;
   private TransparentLabel errorReasonLabel = new TransparentLabel("", 0);
-  private TransparentLabel doneLabel = new TransparentLabel("Регистрация успешно завершена", 0);
-  
+  private TransparentLabel doneLabel = new TransparentLabel("Р РµРіРёСЃС‚СЂР°С†РёСЏ СѓСЃРїРµС€РЅРѕ Р·Р°РІРµСЂС€РµРЅР°", 0);
+
   private JPanel BackgroundBg = new BackgroundRegisterPanel();
   static final Color LABELCOLORREG = new Color(255, 255, 255);
   static final Color LABELCOLORDONE = new Color(45, 118, 214);
   static final Color LABELCOLORERROR = new Color(181, 30, 30);
   private final Font LabelReason = new Font("Tahoma", Font.BOLD, 16);
-  
 
-  
+
+
   public RegisterPanel(Frame parent)
   {
     super(parent);
-    setTitle("Регистрация");
+    setTitle("Р РµРіРёСЃС‚СЂР°С†РёСЏ");
     setSize(400, 380);
     setResizable(false);
     setModal(true);
     setLocationRelativeTo(parent);
-    
+
     BackgroundBg.setLayout(new BorderLayout());
-    
-    
+
+
 
 
     add(BackgroundBg);
@@ -51,21 +51,21 @@ public class RegisterPanel extends JDialog
     RegisterPanelForm ();
 
   }
-  
+
   public void RegisterPanelForm (){
 	  BackgroundBg.removeAll();
 	  BackgroundBg.add(new RegisterLogo(), "North");
 	    final Font fontLabelRegister = new Font("Tahoma", Font.BOLD, 13);
 	    final TextField userField = new TextField();
-	    JLabel userLabel = new JLabel("Ник: ", 2);
+	    JLabel userLabel = new JLabel("РќРёРє: ", 2);
 	    userLabel.setForeground(LABELCOLORREG);
 	    userLabel.setFont(fontLabelRegister);
 	    final TextField PasswordField = new TextField();
-	    JLabel PasswordLabel = new JLabel("Пароль: ", 2);
+	    JLabel PasswordLabel = new JLabel("РџР°СЂРѕР»СЊ: ", 2);
 	    PasswordLabel.setForeground(LABELCOLORREG);
 	    PasswordLabel.setFont(fontLabelRegister);
 	    final TextField Password2Field = new TextField();
-	    JLabel Password2Label = new JLabel("Повторите пароль: ", 2);
+	    JLabel Password2Label = new JLabel("РџРѕРІС‚РѕСЂРёС‚Рµ РїР°СЂРѕР»СЊ: ", 2);
 	    Password2Label.setForeground(LABELCOLORREG);
 	    Password2Label.setFont(fontLabelRegister);
 	    final TextField MailField = new TextField();
@@ -73,7 +73,7 @@ public class RegisterPanel extends JDialog
 	    final JLabel MailLabel = new JLabel("E-mail: ", 2);
 	    MailLabel.setForeground(LABELCOLORREG);
 	    MailLabel.setFont(fontLabelRegister);
-	    
+
 
 	    GridLayout FieldText = new GridLayout(0, 1);
 	    FieldText.setVgap(10);
@@ -83,12 +83,12 @@ public class RegisterPanel extends JDialog
 	    FieldText2.setHgap(10);
 	    GridLayout EnterButton = new GridLayout(0, 1);
 
-	    
+
 	    TransparentPanel titles = new TransparentPanel(FieldText);
 	    TransparentPanel values = new TransparentPanel(FieldText2);
 	    TransparentPanel ButtonOK = new TransparentPanel(EnterButton);
-	    
-	    
+
+
 	    values.add(userField);
 	    titles.add(userLabel);
 	    values.add(PasswordField);
@@ -97,82 +97,82 @@ public class RegisterPanel extends JDialog
 	    titles.add(Password2Label);
 	    values.add(MailField);
 	    titles.add(MailLabel);
-	    
+
 	    BackgroundBg.add(values, "East");
 	    BackgroundBg.add(titles, "West");
-	    
-	    
-	    JButton doneButton = new TransparentButton("Зарегестрироваться");
+
+
+	    JButton doneButton = new TransparentButton("Р—Р°СЂРµРіРµСЃС‚СЂРёСЂРѕРІР°С‚СЊСЃСЏ");
 	    doneButton.addActionListener(new ActionListener() {
 	      public void actionPerformed(ActionEvent ae) {
 		  	    String user = userField.getText();
 			    String Pass = PasswordField.getText();
 			    String Pass2 = Password2Field.getText();
 			    String eMail = MailField.getText();
-	    	  
+
 	    	  register(user, Pass, Pass2, eMail);
-	          
-	          
-	      
+
+
+
 	      }
 	    });
 
-	    
+
 	    doneButton.setBorder(new EmptyBorder(16, 16, 16, 16));
 	    ButtonOK.setBorder(new EmptyBorder(16, 0, 0, 0));
 	    ButtonOK.add(doneButton);
 	    BackgroundBg.add(ButtonOK, "South");
-	    
+
 	    BackgroundBg.repaint();
 	    BackgroundBg.revalidate();
   }
 
 public void register(String name, String pass, String pass2, String mail) {
-  	  
+
 	  try {
 	    URL localURL = new URL(setting.registerLink + URLEncoder.encode(name, "UTF-8") + "&password=" + URLEncoder.encode(pass, "UTF-8") + "&password2=" + URLEncoder.encode(pass2, "UTF-8") + "&email=" + URLEncoder.encode(mail, "UTF-8"));
 		BufferedReader localBufferedReader = new BufferedReader(new InputStreamReader(localURL.openStream()));
-  	    String resultSite = localBufferedReader.readLine(); 
-  	    System.out.println(resultSite);
+  	    String resultSite = localBufferedReader.readLine();
+  	    
   	    if (resultSite.equals("done")){
   	    	doneRegister();
   	    }else{
   	    	if (resultSite.equals("errorMail")){
-  	  	    	failRegister ("eMail адрес введен некорректно");
+  	  	    	failRegister ("eMail Р°РґСЂРµСЃ РІРІРµРґРµРЅ РЅРµРєРѕСЂСЂРµРєС‚РЅРѕ");
   	  	    } else if (resultSite.equals("errorMail2")){
-  	  	    	failRegister ("eMail адрес содержит запрещенные символы");
+  	  	    	failRegister ("eMail Р°РґСЂРµСЃ СЃРѕРґРµСЂР¶РёС‚ Р·Р°РїСЂРµС‰РµРЅРЅС‹Рµ СЃРёРјРІРѕР»С‹");
   	  	    }else if (resultSite.equals("passErrorSymbol")){
-  	  	    	failRegister ("Пароль содержит запрещенные символы");
+  	  	    	failRegister ("РџР°СЂРѕР»СЊ СЃРѕРґРµСЂР¶РёС‚ Р·Р°РїСЂРµС‰РµРЅРЅС‹Рµ СЃРёРјРІРѕР»С‹");
   	  	    }else if (resultSite.equals("errorLoginSymbol")){
-  	  	    	failRegister ("Логин содержит запрещенные символы");
+  	  	    	failRegister ("Р›РѕРіРёРЅ СЃРѕРґРµСЂР¶РёС‚ Р·Р°РїСЂРµС‰РµРЅРЅС‹Рµ СЃРёРјРІРѕР»С‹");
   	  	    }else if (resultSite.equals("errorSmallLogin")){
-  	  	    	failRegister ("Логин должен содержать 2-20 символов");
+  	  	    	failRegister ("Р›РѕРіРёРЅ РґРѕР»Р¶РµРЅ СЃРѕРґРµСЂР¶Р°С‚СЊ 2-20 СЃРёРјРІРѕР»РѕРІ");
   	  	    }else if (resultSite.equals("errorPassSmall")){
-  	  	    	failRegister ("Пароль должен содержать 6-20 символов");
+  	  	    	failRegister ("РџР°СЂРѕР»СЊ РґРѕР»Р¶РµРЅ СЃРѕРґРµСЂР¶Р°С‚СЊ 6-20 СЃРёРјРІРѕР»РѕРІ");
   	  	    }else if (resultSite.equals("emailErrorPovtor")){
-  	  	    	failRegister ("eMail уже зарегестрирован");
+  	  	    	failRegister ("eMail СѓР¶Рµ Р·Р°СЂРµРіРµСЃС‚СЂРёСЂРѕРІР°РЅ");
   	  	    }else if (resultSite.equals("loginErrorPovtor")){
-  	  	    	failRegister ("Пользователем с таким логином уже зарегистрирован");
+  	  	    	failRegister ("РџРѕР»СЊР·РѕРІР°С‚РµР»РµРј СЃ С‚Р°РєРёРј Р»РѕРіРёРЅРѕРј СѓР¶Рµ Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅ");
   	  	    }else if (resultSite.equals("errorMail")){
-  	  	    	failRegister ("Неправильный адрес eMail");
+  	  	    	failRegister ("РќРµРїСЂР°РІРёР»СЊРЅС‹Р№ Р°РґСЂРµСЃ eMail");
   	  	    }else if (resultSite.equals("errorField")){
-  	  	    	failRegister ("Заполнены не все поля");
+  	  	    	failRegister ("Р—Р°РїРѕР»РЅРµРЅС‹ РЅРµ РІСЃРµ РїРѕР»СЏ");
   	  	    }else {
-	  	    	failRegister ("Неизвестная ошибка");
+	  	    	failRegister ("РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР°");
 	  	    }
   	    }
-  	    
-        
-        
-  	    
-  	    
+
+
+
+
+
   	    return;
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 }
-  
+
   public void failRegister (String errorReason){
 
 	  BackgroundBg.removeAll();
@@ -181,20 +181,20 @@ public void register(String name, String pass, String pass2, String mail) {
 	  errorReasonLabel.setForeground(LABELCOLORERROR);
 	  errorReasonLabel.setFont(LabelReason);
 	  BackgroundBg.add(errorReasonLabel,"Center");
-	  
-	  
+
+
     GridLayout EnterButton = new GridLayout(0, 1);
     EnterButton.setVgap(2);
-    
+
 	TransparentPanel ButtonPanel = new TransparentPanel(EnterButton);
-	  
-	    JButton doneButton = new TransparentButton("Попробовать еще раз");
+
+	    JButton doneButton = new TransparentButton("РџРѕРїСЂРѕР±РѕРІР°С‚СЊ РµС‰Рµ СЂР°Р·");
 	    doneButton.addActionListener(new ActionListener() {
 	      public void actionPerformed(ActionEvent ae) {
 	    	  RegisterPanelForm ();
 	      }
 	    });
-	    JButton closeButton = new TransparentButton("Закрыть");
+	    JButton closeButton = new TransparentButton("Р—Р°РєСЂС‹С‚СЊ");
 	    closeButton.addActionListener(new ActionListener() {
 	      public void actionPerformed(ActionEvent ae) {
 	    	  setVisible(false);
@@ -205,14 +205,14 @@ public void register(String name, String pass, String pass2, String mail) {
 	    ButtonPanel.setBorder(new EmptyBorder(16, 0, 0, 0));
 	    ButtonPanel.add(closeButton);
 	    ButtonPanel.add(doneButton);
-	  BackgroundBg.add(ButtonPanel, "South"); 
-	    
+	  BackgroundBg.add(ButtonPanel, "South");
+
 	    BackgroundBg.repaint();
 	    BackgroundBg.revalidate();
-	    
-	    
+
+
   }
-  
+
   public void doneRegister (){
 
 	  BackgroundBg.removeAll();
@@ -220,14 +220,14 @@ public void register(String name, String pass, String pass2, String mail) {
 	  doneLabel.setForeground(LABELCOLORDONE);
 	  doneLabel.setFont(LabelReason);
 	  BackgroundBg.add(doneLabel,"Center");
-	  
-	  
+
+
     GridLayout EnterButton = new GridLayout(0, 1);
     EnterButton.setVgap(2);
-    
+
 	TransparentPanel ButtonPanel = new TransparentPanel(EnterButton);
-	 
-	    JButton closeButton = new TransparentButton("Закрыть");
+
+	    JButton closeButton = new TransparentButton("Р—Р°РєСЂС‹С‚СЊ");
 	    closeButton.addActionListener(new ActionListener() {
 	      public void actionPerformed(ActionEvent ae) {
 	    	  setVisible(false);
@@ -236,13 +236,13 @@ public void register(String name, String pass, String pass2, String mail) {
 	    closeButton.setBorder(new EmptyBorder(16, 0, 16, 0));
 	    ButtonPanel.setBorder(new EmptyBorder(16, 0, 0, 0));
 	    ButtonPanel.add(closeButton);
-	  BackgroundBg.add(ButtonPanel, "South"); 
-	    
+	  BackgroundBg.add(ButtonPanel, "South");
+
 	    BackgroundBg.repaint();
 	    BackgroundBg.revalidate();
-	    
-	    
+
+
   }
-  
+
 
 }

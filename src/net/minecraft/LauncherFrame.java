@@ -10,23 +10,16 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.channels.FileChannel;
-import java.security.DigestInputStream;
-import java.security.MessageDigest;
-import java.util.Formatter;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.security.*;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
@@ -46,15 +39,18 @@ public class LauncherFrame extends Frame
   public Map<String, String> customParameters = new HashMap<String, String>();
   public Launcher launcher;
   public LoginForm LoginForm = new LoginForm(this);
+  public String memoryId;
   public String clientId;
   public static String client;
+  public static String memory;
+  public static String zip = "client.zip";
   public static JPanel panelBg = new bg();
-  
+
 
   public LauncherFrame()
   {
 
-    super("Minecraft Launcher");
+    super(setting.LauncherName);
     setResizable(false);
 	try {
 		Properties defaultProps = new Properties();
@@ -63,7 +59,7 @@ public class LauncherFrame extends Frame
 		defaultProps.load(in);
 
 		clientId = defaultProps.getProperty("client");
-		
+
 		 if (clientId.trim().equals("2")){
 			 client=setting.client2;
 		 }else{
@@ -72,14 +68,14 @@ public class LauncherFrame extends Frame
 		in.close();
 		saveSetting("23");
 	} catch (FileNotFoundException e) {
-		  
+
 			try{
 		 FileChannel source = new FileInputStream("src/launcher.properties").getChannel();
 		 clientId = "1";
 	      FileChannel destination = new FileOutputStream(Util.getWorkingDirectory() + "/launcher.properties").getChannel();
-	  
+
 	      destination.transferFrom(source, 0, source.size());
-	  
+
 	      source.close();
 	      destination.close();
 			}catch (IOException e1) {
@@ -90,11 +86,11 @@ public class LauncherFrame extends Frame
 	}catch (IOException e) {
 		try{
 	 FileChannel source = new FileInputStream("src/launcher.properties").getChannel();
-	    
+
       FileChannel destination = new FileOutputStream(Util.getWorkingDirectory() + "/launcher.properties").getChannel();
-  
+
       destination.transferFrom(source, 0, source.size());
-  
+
       source.close();
       destination.close();
 		}catch (IOException e1) {
@@ -103,24 +99,64 @@ public class LauncherFrame extends Frame
   	}
 	}
 
-    
+        try {
+		Properties defaultProps = new Properties();
+		FileInputStream in;
+		in = new FileInputStream(Util.getWorkingDirectory() + "/launcher.properties");
+		defaultProps.load(in);
+
+		memoryId = defaultProps.getProperty("memory");
+
+		in.close();
+		saveSetting2("1024");
+	} catch (FileNotFoundException e) {
+
+			try{
+		 FileChannel source = new FileInputStream("src/launcher.properties").getChannel();
+		 memoryId = "1024";
+	      FileChannel destination = new FileOutputStream(Util.getWorkingDirectory() + "/launcher.properties").getChannel();
+
+	      destination.transferFrom(source, 0, source.size());
+
+	      source.close();
+	      destination.close();
+			}catch (IOException e1) {
+				memoryId = "1024";
+	  	}
+
+	}catch (IOException e) {
+		try{
+	 FileChannel source = new FileInputStream("src/launcher.properties").getChannel();
+
+      FileChannel destination = new FileOutputStream(Util.getWorkingDirectory() + "/launcher.properties").getChannel();
+
+      destination.transferFrom(source, 0, source.size());
+
+      source.close();
+      destination.close();
+		}catch (IOException e1) {
+			memoryId = "1024";
+  	}
+	}
+
+
     Thread thr = new Thread(new InitSplash());
     thr.start();
     setBackground(Color.BLACK);
 
-    
+
     panelBg.setLayout(new BorderLayout());
-    
+
     panelBg.setPreferredSize(new Dimension(854, 482));
-    
+
     JPanel LauncherFormAll = new LoginForm(this);
-    
+
     panelBg.add(LauncherFormAll);
-    
 
-    
 
-    
+
+
+
     setLayout(new BorderLayout());
     add(panelBg);
 
@@ -154,13 +190,27 @@ public class LauncherFrame extends Frame
         System.exit(0);
       } } );
   }
-  
- 
+
+
   public void playCached(String userName) {
     try {
       if ((userName == null) || (userName.length() <= 0)) {
         userName = "Player";
       }
+
+          String applicationData = System.getenv("APPDATA");
+          String m = applicationData + "/." + setting.mineFolder + "/mods";
+          File n = new File(m);
+          delete(n);
+
+          String g = applicationData + "/." + setting.mineFolder + "/texturepacks";
+          File f = new File(g);
+          delete(f);
+
+          String j = applicationData + "/." + setting.mineFolder + "/config";
+          File l = new File(j);
+          delete(l);
+
       launcher = new Launcher();
       launcher.customParameters.putAll(customParameters);
       launcher.customParameters.put("userName", userName);
@@ -170,63 +220,31 @@ public class LauncherFrame extends Frame
       validate();
       launcher.start();
       LoginForm = null;
-      setTitle("MinecraftASD");
+      setTitle("Minecraft");
     } catch (Exception e) {
       e.printStackTrace();
       showError(e.toString());
     }
   }
-public static String arrayToString(String[] a, String separator) {
-    String result = "";
-    if (a.length > 0) {
-        result = a[0];    // start with the first element
-        for (int i=1; i<a.length; i++) {
-            result = result + separator + a[i];
-        }
-    }
-    return result;
-}
+
   public void login(String userName, String password) {
-//      ---------
-      String f = LauncherFrame.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 
+	    try {
 
- try{
-  MessageDigest md5  = MessageDigest.getInstance("MD5");
-String p = calculateHash(md5, f);
-	try {
-					URL localURL = new URL(setting.hashLinkLauncher + p);
-					BufferedReader localBufferedReader = new BufferedReader(new InputStreamReader(localURL.openStream()));
-					String result = localBufferedReader.readLine();
-					if (result.trim().equals("1")){
-						showError("Необходимо обновить лаунчер");
-						return;
-					}
-				}catch (Exception e) {
-                                    showError("Немогу достать hash");
-					 return;
-				 }
-
- }catch (Exception e) {
-	 showError("Немогу создать hash");
-	 return;
-  }
-//      --------------
-	    try {	     
-
-	    	URL localURL = new URL(setting.authLink + URLEncoder.encode(userName, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8") + "&version=2");
+	    	URL localURL = new URL(setting.authLink + URLEncoder.encode(userName, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8") + "&version=" + setting.version);
 	    	BufferedReader localBufferedReader = new BufferedReader(new InputStreamReader(localURL.openStream()));
 	    	String result = localBufferedReader.readLine();
 	      if (result == null) {
-	        showError("Невозможно подключится к серверу!");
+	        showError("РќРµРІРѕР·РјРѕР¶РЅРѕ РїРѕРґРєР»СЋС‡РёС‚СЃСЏ Рє СЃРµСЂРІРµСЂСѓ!");
 	        return;
 	      }
+              java.lang.System.out.println(result);
 	      if (!result.contains(":")) {
 	        if (result.trim().equals("Bad login")) {
-	          showError("Неправильный логин или пароль!");
+	          showError("РќРµРїСЂР°РІРёР»СЊРЅС‹Р№ Р»РѕРіРёРЅ РёР»Рё РїР°СЂРѕР»СЊ!");
 	          return;
 	        } else if (result.trim().equals("Bad version")) {
-	          showError("Необходимо обновить лаунчер");
+	          showError("РќРµРѕР±С…РѕРґРёРјРѕ РѕР±РЅРѕРІРёС‚СЊ Р»Р°СѓРЅС‡РµСЂ");
 	          return;
 	        } else {
 	          showError(result);
@@ -244,7 +262,7 @@ String p = calculateHash(md5, f);
 	      showError(e.toString());
 	    }
 	  }
-  
+
   public void BuildProfilePanelForm(String result) {
 	  JPanel asdasd = LoginForm.profile(result);
 	  panelBg.removeAll();
@@ -301,10 +319,28 @@ String p = calculateHash(md5, f);
       }
     }
   }
-  
+
   public void Startminecraft (String result){
+      try {
 	  setResizableLol();
 	  md5s();
+          md5szip();
+
+          String applicationData = System.getenv("APPDATA");
+          String m = applicationData + "/." + setting.mineFolder + "/mods";
+          File n = new File(m);
+          delete(n);
+
+          String g = applicationData + "/." + setting.mineFolder + "/texturepacks";
+          File f = new File(g);
+          delete(f);
+
+          String j = applicationData + "/." + setting.mineFolder + "/config";
+          File l = new File(j);
+          delete(l);
+
+          UnZip();
+
       String[] values = result.split(":");
 
       launcher = new Launcher();
@@ -322,19 +358,23 @@ String p = calculateHash(md5, f);
       LoginForm.loginOk();
       LoginForm = null;
       setTitle("Minecraft");
-      
+      } catch (Exception e) {
+      e.printStackTrace();
+      showError(e.toString());
+    }
+
       return;
   }
   private void md5s(){
 	  String applicationData = System.getenv("APPDATA");
       String  f = applicationData + "/." + setting.mineFolder + "/bin/"+ client +".jar";
- 
+
 
  try{
   MessageDigest md5  = MessageDigest.getInstance("MD5");
 String p = calculateHash(md5, f);
-	try {	     	
-					URL localURL = new URL(setting.hashLink + p);
+	try {
+					URL localURL = new URL(setting.hashLink + p + "&check=" + client);
 					BufferedReader localBufferedReader = new BufferedReader(new InputStreamReader(localURL.openStream()));
 					String result = localBufferedReader.readLine();
 					if (result.trim().equals("1")){
@@ -349,12 +389,70 @@ String p = calculateHash(md5, f);
 					 return;
 				 }
 
+          String m = applicationData + "/." + setting.mineFolder + "/mods";
+          File n = new File(m);
+          delete(n);
+
+          String g = applicationData + "/." + setting.mineFolder + "/texturepacks";
+          File o = new File(g);
+          delete(o);
+
+          String j = applicationData + "/." + setting.mineFolder + "/config";
+          File l = new File(j);
+          delete(l);
+
+          UnZip();
+
  }catch (Exception e) {
 	 GameUpdater.forceUpdate = true;
 	 return;
   }
   }
-  
+
+  private void md5szip(){
+	  String applicationData = System.getenv("APPDATA");
+      String  k = applicationData + "/." + setting.mineFolder + "/bin/"+ zip;
+
+
+ try{
+  MessageDigest md5  = MessageDigest.getInstance("MD5");
+String p = calculateHash(md5, k);
+	try {
+					URL localURL = new URL(setting.hashLink + p + "&check=" + "zip");
+					BufferedReader localBufferedReader = new BufferedReader(new InputStreamReader(localURL.openStream()));
+					String result = localBufferedReader.readLine();
+					if (result.trim().equals("1")){
+						GameUpdater.forceUpdate = true;
+						return;
+					}
+					if (result.trim().equals("2")){
+						GameUpdater.forceUpdate = false;
+						return;
+					}
+				}catch (Exception e) {
+					 return;
+				 }
+
+          String m = applicationData + "/." + setting.mineFolder + "/mods";
+          File n = new File(m);
+          delete(n);
+
+          String g = applicationData + "/." + setting.mineFolder + "/texturepacks";
+          File f = new File(g);
+          delete(f);
+
+          String j = applicationData + "/." + setting.mineFolder + "/config";
+          File l = new File(j);
+          delete(l);
+
+          UnZip();
+
+ }catch (Exception e) {
+	 GameUpdater.forceUpdate = true;
+	 return;
+  }
+  }
+
   public static String calculateHash(MessageDigest algorithm,String fileName) throws Exception{
       FileInputStream    fis = new FileInputStream(fileName);
       BufferedInputStream bis = new BufferedInputStream(fis);
@@ -386,8 +484,212 @@ public static void saveSetting(String prop) throws IOException{
         output.close();
 
 }
+
+public static void saveSetting2(String prop) throws IOException{
+
+		Properties defaultProps = new Properties();
+		FileInputStream in;
+		in = new FileInputStream(Util.getWorkingDirectory() + "/launcher.properties");
+		defaultProps.load(in);
+		defaultProps.setProperty("memory", prop);
+        FileOutputStream output = new FileOutputStream(Util.getWorkingDirectory() + "/launcher.properties");
+        defaultProps.store(output, "Saved settings");
+        in.close();
+        output.close();
+
+}
+
 public void setResizableLol(){
 	setResizable(true);
 }
+public void delete(File file)
+  {
+    if(!file.exists())
+      return;
+    if(file.isDirectory())
+    {
+      for(File f : file.listFiles())
+        delete(f);
+      file.delete();
+    }
+    else
+    {
+      file.delete();
+    }
+  }
+
+  /**
+ * Р Р°Р·Р°СЂС…РёРІРёСЂСѓРµС‚ С„Р°Р№Р» client.zip РёР· РїР°РїРєРё bin РІ .minecraft
+ * @author ddark008
+ * @throws PrivilegedActionException
+ */
+protected void UnZip() throws PrivilegedActionException
+  {
+    String szZipFilePath;
+    String szExtractPath;
+    String path = (String)AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+        public Object run() throws Exception {
+          return Util.getWorkingDirectory() + File.separator;
+        }
+      });
+    int i;
+
+    szZipFilePath = path + "bin" + File.separator + "client.zip";
+
+    File f = new File(szZipFilePath);
+    if(!f.exists())
+    {
+      System.out.println(
+	"\nNot found: " + szZipFilePath);
+    }
+
+    if(f.isDirectory())
+    {
+      System.out.println(
+	"\nNot file: " + szZipFilePath);
+    }
+
+    System.out.println(
+      "Enter path to extract files: ");
+    szExtractPath = path;
+
+    File f1 = new File(szExtractPath);
+    if(!f1.exists())
+    {
+      System.out.println(
+	"\nNot found: " + szExtractPath);
+    }
+
+    if(!f1.isDirectory())
+    {
+      System.out.println(
+	"\nNot directory: " + szExtractPath);
+    }
+
+    ZipFile zf;
+    Vector zipEntries = new Vector();
+
+    try
+    {
+      zf = new ZipFile(szZipFilePath);
+      Enumeration en = zf.entries();
+
+      while(en.hasMoreElements())
+      {
+        zipEntries.addElement(
+	  (ZipEntry)en.nextElement());
+      }
+
+      for (i = 0; i < zipEntries.size(); i++)
+      {
+        ZipEntry ze =
+	  (ZipEntry)zipEntries.elementAt(i);
+
+        extractFromZip(szZipFilePath, szExtractPath,
+	  ze.getName(), zf, ze);
+      }
+
+      zf.close();
+      System.out.println("Done!");
+    }
+    catch(Exception ex)
+    {
+      System.out.println(ex.toString());
+    }
+  }
+
+  // ============================================
+  // extractFromZip
+  // ============================================
+  static void extractFromZip(
+    String szZipFilePath, String szExtractPath,
+    String szName,
+    ZipFile zf, ZipEntry ze)
+  {
+    if(ze.isDirectory())
+      return;
+
+    String szDstName = slash2sep(szName);
+
+    String szEntryDir;
+
+    if(szDstName.lastIndexOf(File.separator) != -1)
+    {
+      szEntryDir =
+        szDstName.substring(
+	  0, szDstName.lastIndexOf(File.separator));
+    }
+    else
+      szEntryDir = "";
+
+    System.out.print(szDstName);
+    long nSize = ze.getSize();
+    long nCompressedSize =
+      ze.getCompressedSize();
+
+    System.out.println(" " + nSize + " (" +
+      nCompressedSize + ")");
+
+    try
+    {
+       File newDir = new File(szExtractPath +
+	 File.separator + szEntryDir);
+
+       newDir.mkdirs();
+
+       FileOutputStream fos =
+	 new FileOutputStream(szExtractPath +
+	 File.separator + szDstName);
+
+       InputStream is = zf.getInputStream(ze);
+       byte[] buf = new byte[1024];
+
+       int nLength;
+
+       while(true)
+       {
+         try
+         {
+	   nLength = is.read(buf);
+         }
+         catch (EOFException ex)
+         {
+	   break;
+	 }
+
+         if(nLength < 0)
+	   break;
+         fos.write(buf, 0, nLength);
+       }
+
+       is.close();
+       fos.close();
+    }
+    catch(Exception ex)
+    {
+      System.out.println(ex.toString());
+      //System.exit(0);
+    }
+  }
+  // ============================================
+  // slash2sep
+  // ============================================
+  static String slash2sep(String src)
+  {
+    int i;
+    char[] chDst = new char[src.length()];
+    String dst;
+
+    for(i = 0; i < src.length(); i++)
+    {
+      if(src.charAt(i) == '/')
+        chDst[i] = File.separatorChar;
+      else
+        chDst[i] = src.charAt(i);
+    }
+    dst = new String(chDst);
+    return dst;
+  }
+
 
 }

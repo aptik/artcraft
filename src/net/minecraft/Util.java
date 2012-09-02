@@ -54,7 +54,7 @@ public class Util
     return workingDirectory;
   }
 
-  private static OS getPlatform() {
+  public static OS getPlatform() {
     String osName = System.getProperty("os.name").toLowerCase();
     if (osName.contains("win")) return OS.windows;
     if (osName.contains("mac")) return OS.macos;
@@ -147,8 +147,37 @@ public class Util
   }
 
   
-  private static enum OS
+  public static enum OS
   {
     linux, solaris, windows, macos, unknown;
   }
+  
+  private static SettingsHandler settings = new SettingsHandler("../../launcher.properties", new File(Util.getWorkingDirectory(), "launcher.properties"));
+	
+	static {
+		settings.load();
+	}
+	
+	public static int getMemorySelection() {
+		return getProperty("memory", 1);
+	}
+	
+	public static void setMemorySelection(int value) {
+		setProperty("memory", value);
+	}
+	
+	private static void setProperty(String s, Object value) {
+		if (settings.checkProperty(s)) {
+			settings.changeProperty(s, value);
+		}
+		else
+		settings.put(s, value);
+	}
+	
+	private static int getProperty(String s, int def) {
+		if (settings.checkProperty(s)) {
+			return settings.getPropertyInteger(s);
+		}
+		return def;
+	}
 }
