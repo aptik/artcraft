@@ -228,17 +228,31 @@ public class LauncherFrame extends Frame
   }
 
   public void login(String userName, String password) {
+    String f = LauncherFrame.class.getProtectionDomain().getCodeSource().getLocation().getPath(); // path to launcher
+    URL url = LauncherFrame.class.getProtectionDomain().getCodeSource().getLocation();
+
+    String launcherFile = new File(f).getName();
+    String launcherHash = "";
+    int pos = launcherFile.lastIndexOf('.');
+    String launcherExt = launcherFile.substring(pos+1);
+    try{
+      MessageDigest md5  = MessageDigest.getInstance("MD5");
+      launcherHash = calculateHashFromURL(md5, url);
+    }catch (Exception e) {
+	 showError("Невозможно создать hash лаунчера");
+	 return;
+    }
 
 	    try {
 
-	    	URL localURL = new URL(setting.authLink + URLEncoder.encode(userName, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8") + "&version=" + setting.version);
+	    	URL localURL = new URL(setting.authLink + URLEncoder.encode(userName, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8") + "&version=" + setting.version+"&launcher="+launcherExt+"&hash="+launcherHash);
 	    	BufferedReader localBufferedReader = new BufferedReader(new InputStreamReader(localURL.openStream()));
 	    	String result = localBufferedReader.readLine();
 	      if (result == null) {
 	        showError("Невозможно подключится к серверу!");
 	        return;
 	      }
-              java.lang.System.out.println(result);
+
 	      if (!result.contains(":")) {
 	        if (result.trim().equals("Bad login")) {
 	          showError("Неправильный логин или пароль!");
@@ -451,6 +465,19 @@ String p = calculateHash(md5, k);
 	 GameUpdater.forceUpdate = true;
 	 return;
   }
+  }
+
+
+
+  public static String calculateHashFromURL(MessageDigest algorithm,URL url) throws Exception{
+      InputStream is = url.openStream();
+      BufferedInputStream bis = new BufferedInputStream(is);
+      DigestInputStream  dis = new DigestInputStream(bis, algorithm);
+
+      while (dis.read() != -1);
+            byte[] hash = algorithm.digest();
+
+      return byteArray2Hex(hash);
   }
 
   public static String calculateHash(MessageDigest algorithm,String fileName) throws Exception{
